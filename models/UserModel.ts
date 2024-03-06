@@ -1,5 +1,6 @@
 import { model, Schema } from "mongoose";
-interface IUserModel {
+export interface IUserModel {
+  _id: Schema.Types.ObjectId;
   email: string;
   fullname: string;
   username: string;
@@ -44,6 +45,15 @@ const UserSchema = new Schema<IUserModel>({
   about: String,
   website: String,
 });
+
+UserSchema.methods.toJSON = function () {
+  const user = this;
+  const userObject = user.toObject();
+
+  delete userObject.password;
+  delete userObject.confirm_hash;
+  return userObject;
+};
 
 const UserModel = model<IUserModel>("User", UserSchema);
 export default UserModel;
