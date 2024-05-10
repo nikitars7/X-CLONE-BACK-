@@ -7,18 +7,21 @@ export interface ITweetModel {
   user: IUserModel | Schema.Types.ObjectId;
 }
 
-const TweetSchema = new Schema<ITweetModel>({
-  text: {
-    type: String,
-    required: true,
-    maxlength: 280,
+const TweetSchema = new Schema<ITweetModel>(
+  {
+    text: {
+      type: String,
+      required: true,
+      maxlength: 280,
+    },
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
-  user: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
-});
+  { timestamps: true }
+);
 
 const TweetModel = model<ITweetModel>("Tweet", TweetSchema);
 export default TweetModel;

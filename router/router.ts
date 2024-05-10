@@ -30,6 +30,7 @@ router.delete(
 router.put(
   "/tweets",
   passport.authenticate("jwt", { session: false }),
+  createTweetValidations,
   TweetsController.update
 );
 router.post(

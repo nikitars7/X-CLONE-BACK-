@@ -22,6 +22,7 @@ export const registerValidations = [
     .isString()
     .isLength({ min: 2, max: 40 })
     .withMessage("Incorrect login length"),
+  body("birthdate", "enter your birthdate"),
   body("password", "Enter your password")
     .isString()
     .isLength({ min: 6 })

@@ -1,22 +1,19 @@
 import express from "express";
 import UserModel, { IUserModel } from "../models/UserModel";
-import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { validationResult } from "express-validator";
 import { generateHash } from "../utils/generateHash";
 import { sendEmail } from "../utils/sendMail";
+import { isValidObjectId } from "../utils/isValidObjid";
 const generateAccessToken = (user: IUserModel) => {
   const payload = {
     ...user,
   };
-  console.log(payload);
-  console.log(process.env.SECRET_KEY);
   return jwt.sign(payload, (process.env.SECRET_KEY as string) || "123", {
     expiresIn: "24h",
   });
 };
-const isValidObjectId = mongoose.Types.ObjectId.isValid;
 class UserController {
   async index(req: express.Request, res: express.Response): Promise<void> {
     try {
@@ -69,6 +66,7 @@ class UserController {
         email: req.body.email,
         fullname: req.body.fullname,
         username: req.body.username,
+        birthdate: req.body.birthdate,
         password: hashPassword,
         confirm_hash: generateHash(
           process.env.SECRET_KEY || Math.random().toString()
@@ -82,7 +80,7 @@ class UserController {
           subject: "Confirmation message X-clone",
           html: `To confirm your E-mail , go to <a href="http://localhost:${
             process.env.PORT || 8888
-          }/auth/verify?hash=${data.confirm_hash}">this link</a> `,
+          }/x-clone/auth/verify?hash=${data.confirm_hash}">this link</a> `,
         },
         (err: Error | null) => {
           if (err) {
@@ -111,6 +109,7 @@ class UserController {
         throw new Error("User were not found");
       }
       user.confirmed = true;
+      // await
       user.save();
       res.json({
         status: "success",
@@ -127,7 +126,7 @@ class UserController {
       res.json({
         status: "success",
         data: {
-          ...req.user,
+          user: req.user,
           token: generateAccessToken(req.user as IUserModel),
         },
       });

@@ -7,7 +7,10 @@ import { IUserModel } from "../models/UserModel";
 class TweetsController {
   async index(req: express.Request, res: express.Response): Promise<void> {
     try {
-      const tweets = await TweetModel.find({}).exec();
+      const tweets = await TweetModel.find({})
+        .populate("user")
+        .sort({ createdAt: -1 })
+        .exec();
       if (!tweets) {
         throw new Error("Tweets were not found");
       }
@@ -25,7 +28,7 @@ class TweetsController {
       if (!isValidObjectId(tweetId)) {
         res.status(404).json({ message: "Error" });
       }
-      const tweet = await TweetModel.findById(tweetId).exec();
+      const tweet = await TweetModel.findById(tweetId).populate("user").exec();
       if (!tweet) {
         throw new Error("User was not found");
       }
@@ -47,7 +50,7 @@ class TweetsController {
       if (!errors.isEmpty()) {
         return res
           .status(400)
-          .json({ message: "Error occured during register", errors });
+          .json({ message: "Error occured during creating a post", errors });
       }
       const data: ITweetModel = {
         text: req.body.text,
@@ -56,7 +59,7 @@ class TweetsController {
       const tweet = await TweetModel.create(data);
       res.json({
         status: "success",
-        tweet,
+        data: await tweet.populate("user"),
       });
     } catch (error) {
       console.log(error);
@@ -90,11 +93,13 @@ class TweetsController {
   async update(req: express.Request, res: express.Response) {
     try {
       const user = req.user as IUserModel;
-      console.log(user);
       if (user) {
         const tweet = req.body;
         if (!tweet._id) {
           throw new Error("tweet is not found");
+        }
+        if (!isValidObjectId(tweet._id)) {
+          res.status(404).json({ message: "Error" });
         }
         if (tweet.user.toString() === user._id.toString()) {
           const updatedTweet = await TweetModel.findByIdAndUpdate(

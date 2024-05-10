@@ -17,7 +17,7 @@ passport.use(
         password,
         storedHashedPassword
       );
-      if (isPasswordValid) {
+      if (isPasswordValid && user.confirmed) {
         done(null, user);
       } else {
         done(null, false);
@@ -38,7 +38,7 @@ passport.deserializeUser((id, done) => {
 });
 
 const jwtOptions = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  jwtFromRequest: ExtractJwt.fromHeader("token"),
   secretOrKey: (process.env.SECRET_KEY as string) || "123",
 };
 
